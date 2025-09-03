@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Government Online Exam Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2c5282;
+            --accent-color: #4299e1;
+            --light-color: #ebf8ff;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7fafc;
+        }
+        
+        .exam-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .question-navigation {
+            scroll-behavior: smooth;
+        }
+        
+        /* Animation for timer warning */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .timer-warning {
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Authentication Section -->
+    <div id="auth-section" class="flex flex-col items-center justify-center min-h-screen bg-gray-100 px-4 py-8">
+        <div class="w-full max-w-md bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="bg-blue-900 py-6 px-8">
+                <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/793f48b0-46e5-4e91-b7a8-a69e253ba4f9.png" alt="Government Online Exam Portal Logo" class="h-12 mx-auto">
+                <h1 class="text-white text-xl font-bold text-center mt-4">Online Examination System</h1>
+            </div>
+            
+            <div class="px-8 py-6">
+                <div id="login-form" class="">
+                    <h2 class="text-xl font-semibold text-gray-800 mb-6 text-center">Login</h2>
+                    <div class="flex justify-center mb-4">
+                        <button id="toggle-admin" class="text-blue-600 hover:text-blue-800 text-sm">
+                            Admin Login
+                        </button>
+                    </div>
+                    
+                    <form id="loginForm" class="space-y-4">
+                        <div>
+                            <label for="registrationNumber" class="block text-sm font-medium text-gray-700">Registration Number</label>
+                            <input type="text" id="registrationNumber" name="registrationNumber" 
+                                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                            <input type="password" id="password" name="password" 
+                                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        
+                        <div>
+                            <label for="examCode" class="block text-sm font-medium text-gray-700">Exam Code</label>
+                            <input type="text" id="examCode" name="examCode" 
+                                   class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <input id="remember-me" name="remember-me" type="checkbox" 
+                                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
+                            </div>
+                            
+                            <div class="text-sm">
+                                <a href="#" class="font-medium text-blue-600 hover:text-blue-500">Forgot password?</a>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-900 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                Sign in
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Section (hidden initially) -->
+    <div id="dashboard-section" class="hidden min-h-screen">
+        <header class="bg-blue-900 text-white shadow-md">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/14b05c6b-090e-42ce-8770-b0a61fd3589a.png" alt="Government Logo" class="h-8 w-8">
+                    <h1 class="text-xl font-bold">Government Exam Portal</h1>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:block">
+                        <div id="dashboard-timer" class="bg-blue-800 px-3 py-1 rounded-md font-mono">
+                            <span>00:00:00</span>
+                    </div>
+                    <button id="logout-btn" class="ml-4 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+                        Logout
+                    </button>
+                </div>
+            </div>
+            
+            <div class="bg-blue-800 px-4 py-2 flex justify-between items-center">
+                <div>
+                    <span id="user-info" class="text-sm">Candidate: </span>
+                    <span id="exam-info" class="text-sm ml-4">Exam: </span>
+                </div>
+                <div id="mobile-timer" class="md:hidden bg-blue-900 px-2 py-1 rounded font-mono text-sm">
+                    <span>00:00:00</span>
+                </div>
+            </div>
+        </header>
+        
+        <main class="container mx-auto px-4 py-8">
+            <!-- Exam List Section -->
+            <div id="exam-list-section">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Upcoming Exams</h2>
+                    <div class="relative">
+                        <select id="exam-filter" class="appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-8 py-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                            <option value="all">All Exams</option>
+                            <option value="today">Today</option>
+                            <option value="upcoming">Upcoming</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Exam Card 1 -->
+                    <div class="exam-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
+                        <div class="bg-blue-700 p-4 text-white">
+                            <h3 class="text-lg font-semibold">Civil Service Preliminary Exam 2023</h3>
+                            <p class="text-sm mt-1">Exam Code: CSP-2023-001</p>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between text-sm text-gray-600 mb-3">
+                                <div class="flex items-center">
+                                    <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span>25 Oct 2023</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span>2 hours</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">General Studies</span>
+                                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">CSAT</span>
+                                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">100 Questions</span>
+                            </div>
+                            
+                            <div class="text-sm text-gray-700 mb-4">
+                                <p>The Civil Service Preliminary Examination consists of two papers - General Studies and Civil Services Aptitude Test (CSAT).</p>
+                            </div>
+                            
+                            <div class="flex justify-between items-center mt-4">
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Eligible</span>
+                                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-300 exam-start-btn" data-exam-id="CSP-2023-001">
+                                    Start Exam
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Exam Card 2 -->
+                    <div class="exam-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
+                        <div class="bg-blue-700 p-4 text-white">
+                            <h3 class="text-lg font-semibold">Banking Services Prelims</h3>
+                            <p class="text-sm mt-1">Exam Code: BSP-2023-002</p>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between text-sm text-gray-600 mb-3">
+                                <div class="flex items-center">
+                                    <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span>30 Oct 2023</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span>1 hour</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Quantitative Aptitude</span>
+                                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">Reasoning</span>
+                                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">English</span>
+                                <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">50 Questions</span>
+                            </div>
+                            
+                            <div class="text-sm text-gray-700 mb-4">
+                                <p>The Banking Services Preliminary Examination tests candidates on quantitative aptitude, reasoning ability, and English language skills.</p>
+                            </div>
+                            
+                            <div class="flex justify-between items-center mt-4">
+                                <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">Slot Available</span>
+                                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-300 exam-start-btn" data-exam-id="BSP-2023-002">
+                                    Start Exam
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Exam Card 3 -->
+                    <div class="exam-card bg-white rounded-lg shadow-md overflow-hidden transition duration-300">
+                        <div class="bg-gray-700 p-4 text-white">
+                            <h3 class="text-lg font-semibold">Forest Services Mains</h3>
+                            <p class="text-sm mt-1">Exam Code: FSM-2023-003</p>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between text-sm text-gray-600 mb-3">
+                                <div class="flex items-center">
+                                    <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span>15 Nov 2023</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <span>3 hours</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">Forestry</span>
+                                <span class="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">Wildlife</span>
+                                <span class="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">Ecology</span>
+                                <span class="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">Essay</span>
+                            </div>
+                            
+                            <div class="text-sm text-gray-700 mb-4">
+                                <p>The Indian Forest Service Mains Examination consists of six papers including essay writing, forestry, wildlife, ecology, and general English.</p>
+                            </div>
+                            
+                            <div class="flex justify-between items-center mt-4">
+                                <span class="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">Not Eligible</span>
+                                <button class="bg-gray-400 text-white px-4 py-2 rounded-md text-sm font-medium cursor-not-allowed" disabled>
+                                    Requirements Not Met
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Exam Interface (hidden initially) -->
+            <div id="exam-interface-section" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 id="current-exam-title" class="text-2xl font-bold text-gray-800"></h2>
+                    <div id="exam-timer" class="bg-blue-100 text-blue-800 px-4 py-2 rounded-md font-mono text-lg">
+                        00:00:00
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="flex flex-col md:flex-row">
+                        <!-- Left sidebar - Question navigation -->
+                        <div class="w-full md:w-1/4 bg-gray-50 p-4 border-r border-gray-200">
+                            <h3 class="font-semibold text-gray-800 mb-4">Question Navigation</h3>
+                            
+                            <div class="mb-4">
+                                <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                    <span>Answered: <span id="answered-count" class="font-semibold">0</span></span>
+                                    <span>Unanswered: <span id="unanswered-count" class="font-semibold">0</span></span>
+                                </div>
+                                <div class="flex justify-between text-sm text-gray-600">
+                                    <span>Marked for Review: <span id="marked-count" class="font-semibold">0</span></span>
+                                    <span>Total: <span id="total-count" class="font-semibold">0</span></span>
+                                </div>
+                            </div>
+                            
+                            <div id="question-navigation" class="question-navigation grid grid-cols-5 gap-2 overflow-y-auto max-h-64">
+                                <!-- Question buttons will be added here by JavaScript -->
+                            </div>
+                            
+                            <div class="mt-4 pt-4 border-t border-gray-200">
+                                <button id="submit-exam-btn" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md text-sm font-medium">
+                                    Submit Exam
+                                </button>
+                                
+                                <div class="mt-2 text-xs text-gray-500">
+                                    <p>Note: Once submitted, you cannot change your answers. Please review all questions before submission.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Main exam content -->
+                        <div class="w-full md:w-3/4 p-4">
+                            <div id="question-container" class="mb-6">
+                                <!-- Current question will be displayed here -->
+                            </div>
+                            
+                            <div class="flex justify-between">
+                                <button id="prev-question-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-md text-sm font-medium">
+                                    Previous Question
+                                </button>
+                                
+                                <div class="space-x-2">
+                                    <button id="mark-review-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-md text-sm font-medium">
+                                        Mark for Review
+                                    </button>
+                                    <button id="next-question-btn" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md text-sm font-medium">
+                                        Next Question
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Exam Submission Modal (hidden initially) -->
+        <div id="submission-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="p-6">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-lg leading-6 font-medium text-gray-900">Submit Your Exam</h3>
+                        <button id="cancel-submission-btn" class="text-gray-400 hover:text-gray-500">
+                            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <p id="modal-message" class="text-sm text-gray-500"></p>
+                        
+                        <div class="mt-4 flex justify-between text-sm">
+                            <div class="text-gray-700">
+                                <p>Answered: <span id="modal-answered" class="font-semibold">0</span></p>
+                                <p>Unanswered: <span id="modal-unanswered" class="font-semibold">0</span></p>
+                            </div>
+                            <div class="text-gray-700">
+                                <p>Marked for Review: <span id="modal-marked" class="font-semibold">0</span></p>
+                                <p>Time Remaining: <span id="modal-time" class="font-semibold">00:00:00</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button id="confirm-submission-btn" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md text-sm font-medium">
+                            Confirm Submission
+                        </button>
+                        <button id="go-back-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-md text-sm font-medium">
+                            Go Back to Exam
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Exam Completion Modal (hidden initially) -->
+        <div id="completion-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-lg shadow-xl max-w-md w-full">
+                <div class="p-6 text-center">
+                    <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h3 class="mt-3 text-lg leading-6 font-medium text-gray-900">Exam Submitted Successfully!</h3>
+                    <div class="mt-2">
+                        <p class="text-sm text-gray-500">Your answers have been saved and submitted successfully. You will receive your results within 15 working days.</p>
+                    </div>
+                    <div class="mt-4">
+                        <button id="return-to-dashboard-btn" class="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Return to Dashboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel Section (hidden initially) -->
+    <div id="admin-panel" class="hidden min-h-screen bg-gray-100">
+        <header class="bg-blue-900 text-white shadow-md">
+            <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/28a97728-31da-409b-af27-1f8acd59217f.png" alt="Admin Logo" class="h-8 w-8">
+                    <h1 class="text-xl font-bold">Exam Admin Panel</h1>
+                </div>
+                <button id="admin-logout-btn" class="ml-4 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+                    Logout
+                </button>
+            </div>
+        </header>
+
+        <main class="container mx-auto px-4 py-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Exam Management</h2>
+                <button id="new-exam-btn" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium">
+                    Create New Exam
+                </button>
+            </div>
+
+            <!-- Exam List -->
+            <div class="bg-white shadow overflow-hidden rounded-lg">
+                <div class="divide-y divide-gray-200">
+                    <!-- Exam Item -->
+                    <div class="p-4 flex justify-between items-center">
+                        <div>
+                            <h3 class="text-lg font-medium">Civil Service Exam 2023</h3>
+                            <p class="text-sm text-gray-500">50 Questions | 2 Hours Duration</p>
+                        </div>
+                        <div class="space-x-2">
+                            <button class="edit-exam-btn bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
+                                Edit
+                            </button>
+                            <button class="delete-exam-btn bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exam Form Modal (hidden initially) -->
+            <div id="exam-form-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl">
+                    <div class="p-6">
+                        <h3 class="text-lg font-medium mb-4">Create/Edit Exam</h3>
+                        <form id="exam-form">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Exam Title</label>
+                                    <input type="text" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Exam Code</label>
+                                    <input type="text" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Duration (minutes)</label>
+                                    <input type="number" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Exam Date</label>
+                                    <input type="date" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700">Instructions</label>
+                                <textarea rows="3" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3"></textarea>
+                            </div>
+
+                            <!-- Questions Section -->
+                            <div class="mb-6">
+                                <h4 class="font-medium text-gray-800 mb-2">Questions</h4>
+                                <div id="question-list" class="space-y-4 mb-4">
+                                    <!-- Questions will be added here -->
+                                </div>
+                                <button type="button" id="add-question-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm">
+                                    Add Question
+                                </button>
+                            </div>
+
+                            <div class="flex justify-end space-x-3">
+                                <button type="button" id="cancel-exam-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-md text-sm font-medium">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md text-sm font-medium">
+                                    Save Exam
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Exam data - in a real application, this would come from an API
+        const exams = {
+            "CSP-2023-001": {
+                id: "CSP-2023-001",
+                title: "Civil Service Preliminary Exam 2023",
+                duration: 7200, // 2 hours in seconds
+                instructions: "Read each question carefully before answering. There is negative marking for incorrect answers (-0.33 marks for each wrong answer). All questions are multiple-choice with four options.",
+                questions: [
+                    {
+                        id: 1,
+                        text: "Which of the following countries does NOT share a border with India?",
+                        options: ["Nepal", "Bhutan", "Afghanistan", "Sri Lanka"],
+                        correctAnswer: 3,
+                        selectedAnswer: null,
+                        markedForReview: false,
+                        answered: false
+                    },
+                    {
+                        id: 2,
+                        text: "The 'Montreal Protocol' is related to:",
+                        options: [
+                            "Protection of the ozone layer",
+                            "Biological weapons",
+                            "Climate change",
+                            "International trade"
+                        ],
+                        correctAnswer: 0,
+                        selectedAnswer: null,
+                        markedForReview: false,
+                        answered: false
+                    },
+                    {
+                        id: 3,
+                        text: "Which of the following is NOT a Fundamental Right under the Indian Constitution?",
+                        options: [
+                            "Right to Equality",
+                            "Right to Freedom",
+                            "Right to Property",
+                            "Right against Exploitation"
+                        ],
+                        correctAnswer: 2,
+                        selectedAnswer: null,
+                        markedForReview: false,
+                        answered: false
+                    },
+                    {
+                        id: 4,
+                        text: "The 'Himalayan Quail' was last seen in which year?",
+                        options: ["1876", "1896", "1916", "1936"],
+                        correctAnswer: 1,
+                        selectedAnswer: null,
+                        markedForReview: false,
+                        answered: false
+                    },
+                    {
+                        id: 5,
+                        text: "The 'Green House Effect' is caused by:",
+                        options: [
+                            "Ultraviolet radiation",
+                            "Infrared radiation",
+                            "Ozone depletion",
+                            "Carbon monoxide emissions"
+                        ],
+                        correctAnswer: 1,
+                        selectedAnswer: null,
+                        markedForReview: false,
+                        answered: false
+                    }
+                ]
+            },
+            "BSP-2023-002": {
+                id: "BSP-2023-002",
+                title: "Banking Services Prelims 2023",
+                duration: 3600, // 1 hour in seconds
+                instructions: "Each correct answer carries 1 mark. There is no negative marking. The exam consists of sections on Quantitative Aptitude, Reasoning Ability, and English Language.",
+                questions: [
+                    {
+                        id: 1,
+                        text: "If the price of sugar increases by 20%, by what percent should a household reduce its consumption so that expenditure remains the same?",
+                        options: ["15%", "16.67%", "18%", "20%"],
+                        correctAnswer: 1,
+                        selectedAnswer: null,
+                        markedForReview: false,
+                        answered: false
+                    },
+                    {
+                        id: 2,
+                        text: "Complete the series: 2, 5, 10, 17, 26, ?",
+                        options: ["35", "36", "37", "38"],
+                        correctAnswer: 2,
+                        selectedAnswer: null,
+                        markedForReview: false,
+                        answered: false
+                    },
+                    {
+                        id: 3,
+                        text: "Select the word which is most opposite in meaning to 'PRODIGAL':",
+                        options: ["Generous", "Miserly", "Extravagant", "Wasteful"],
+                        correctAnswer: 1,
+                        selectedAnswer: null,
+                        markedForReview: false,
+                        answered: false
+                    },
+                    {
+                        id: 4,
+                        text: "If in a certain code, 'BRIGHT' is written as 'EJLIW', how is 'DARK' written in that code?",
+                        options: ["GDRN", "GDQN", "GDRO", "GDOR"],
+                        correctAnswer: 1,
+                        selectedAnswer: null,
+                        markedForReview: false,
+                        answered: false
+                    },
+                    {
+                        id: 5,
+                        text: "Identify the grammatically correct sentence:",
+                        options: [
+                            "Each of the boys were given a prize.",
+                            "Each of the boys was given a prize.",
+                            "Each of the boys was gave a prize.",
+                            "Each of the boys were gave a prize."
+                        ],
+                        correctAnswer: 1,
+                        selectedAnswer: null,
+                        markedForReview: false,
+                        answered: false
+                    }
+                ]
+            }
+        };
+
+        // Current state of the application
+        let currentState = {
+            loggedIn: false,
+            isAdmin: false,
+            currentExam: null,
+            currentQuestionIndex: 0,
+            timeRemaining: 0,
+            timerInterval: null
+        };
+
+        // DOM elements
+        const authSection = document.getElementById('auth-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const examListSection = document.getElementById('exam-list-section');
+        const examInterfaceSection = document.getElementById('exam-interface-section');
+        const loginForm = document.getElementById('loginForm');
+        const logoutBtn = document.getElementById('logout-btn');
+        const examStartButtons = document.querySelectorAll('.exam-start-btn');
+        const currentExamTitle = document.getElementById('current-exam-title');
+        const questionContainer = document.getElementById('question-container');
+        const questionNavigation = document.getElementById('question-navigation');
+        const answeredCount = document.getElementById('answered-count');
+        const unansweredCount = document.getElementById('unanswered-count');
+        const markedCount = document.getElementById('marked-count');
+        const totalCount = document.getElementById('total-count');
+        const prevQuestionBtn = document.getElementById('prev-question-btn');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const markReviewBtn = document.getElementById('mark-review-btn');
+        const submitExamBtn = document.getElementById('submit-exam-btn');
+        const submissionModal = document.getElementById('submission-modal');
+        const cancelSubmissionBtn = document.getElementById('cancel-submission-btn');
+        const confirmSubmissionBtn = document.getElementById('confirm-submission-btn');
+        const goBackBtn = document.getElementById('go-back-btn');
+        const completionModal = document.getElementById('completion-modal');
+        const returnToDashboardBtn = document.getElementById('return-to-dashboard-btn');
+        const modalAnswered = document.getElementById('modal-answered');
+        const modalUnanswered = document.getElementById('modal-unanswered');
+        const modalMarked = document.getElementById('modal-marked');
+        const modalTime = document.getElementById('modal-time');
+        const dashboardTimer = document.getElementById('dashboard-timer');
+        const mobileTimer = document.getElementById('mobile-timer');
+        const examTimer = document.getElementById('exam-timer');
+        const userInfo = document.getElementById('user-info');
+        const examInfo = document.getElementById('exam-info');
+
+        // Event listeners
+        // New elements
+        const adminPanel = document.getElementById('admin-panel');
+        const toggleAdminBtn = document.getElementById('toggle-admin');
+        const adminLogoutBtn = document.getElementById('admin-logout-btn');
+
+        // Event listeners
+        toggleAdminBtn?.addEventListener('click', () => {
+            document.getElementById('login-form').classList.toggle('hidden');
+            document.getElementById('admin-login-form').classList.toggle('hidden');
+        });
+        
+        loginForm.addEventListener('submit', handleLogin);
+        logoutBtn.addEventListener('click', handleLogout);
+        adminLogoutBtn?.addEventListener('click', () => {
+            currentState.loggedIn = false;
+            currentState.isAdmin = false;
+            adminPanel.classList.add('hidden');
+            authSection.classList.remove('hidden');
+        });
+        document.querySelectorAll('.exam-start-btn').forEach(button => {
+            button.addEventListener('click', () => startExam(button.dataset.examId));
+        });
+        prevQuestionBtn.addEventListener('click', () => navigateQuestion(-1));
+        nextQuestionBtn.addEventListener('click', () => navigateQuestion(1));
+        markReviewBtn.addEventListener('click', toggleMarkForReview);
+        submitExamBtn.addEventListener('click', showSubmissionModal);
+        cancelSubmissionBtn.addEventListener('click', hideSubmissionModal);
+        goBackBtn.addEventListener('click', hideSubmissionModal);
+        confirmSubmissionBtn.addEventListener('click', submitExam);
+        returnToDashboardBtn.addEventListener('click', returnToDashboard);
+
+        // Functions
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            const registrationNumber = document.getElementById('registrationNumber').value;
+            const examCode = document.getElementById('examCode').value;
+            
+            // Simple validation
+            if (!registrationNumber || !examCode) {
+                alert('Please enter both registration number and exam code');
+                return;
+            }
+            
+            // In a real app, this would verify credentials against a server
+            currentState.loggedIn = true;
+            
+            // Update UI
+            authSection.classList.add('hidden');
+            dashboardSection.classList.remove('hidden');
+            userInfo.textContent = `Candidate: ${registrationNumber}`;
+            examInfo.textContent = `Exam: ${examCode}`;
+            
+            // Start dashboard timer
+            updateDashboardTimer();
+            setInterval(updateDashboardTimer, 1000);
+        }
+
+        function handleLogout() {
+            currentState.loggedIn = false;
+            clearInterval(currentState.timerInterval);
+            
+            // Reset form
+            loginForm.reset();
+            
+            // Update UI
+            dashboardSection.classList.add('hidden');
+            authSection.classList.remove('hidden');
+            examInterfaceSection.classList.add('hidden');
+            examListSection.classList.remove('hidden');
+        }
+
+        function startExam(examId) {
+            if (!exams[examId]) {
+                alert('Exam not found. Please select a valid exam.');
+                return;
+            }
+            
+            currentState.currentExam = JSON.parse(JSON.stringify(exams[examId])); // Deep clone
+            currentState.currentQuestionIndex = 0;
+            currentState.timeRemaining = currentState.currentExam.duration;
+            
+            // Update UI
+            examListSection.classList.add('hidden');
+            examInterfaceSection.classList.remove('hidden');
+            currentExamTitle.textContent = currentState.currentExam.title;
+            
+            // Initialize question navigation
+            initializeQuestionNavigation();
+            
+            // Load first question
+            loadQuestion(currentState.currentQuestionIndex);
+            
+            // Start timer
+            startTimer();
+            
+            // Update counts
+            updateQuestionCounts();
+        }
+
+        function initializeQuestionNavigation() {
+            questionNavigation.innerHTML = '';
+            
+            currentState.currentExam.questions.forEach((question, index) => {
+                const button = document.createElement('button');
+                button.className = `w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium 
+                                    ${question.markedForReview ? 'bg-yellow-100 text-yellow-800' : 
+                                    question.answered ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`;
+                button.textContent = index + 1;
+                button.addEventListener('click', () => {
+                    currentState.currentQuestionIndex = index;
+                    loadQuestion(index);
+                });
+                questionNavigation.appendChild(button);
+            });
+        }
+
+        function loadQuestion(index) {
+            if (!currentState.currentExam || index < 0 || index >= currentState.currentExam.questions.length) {
+                return;
+            }
+            
+            const question = currentState.currentExam.questions[index];
+            
+            // Highlight the current question in navigation
+            const navButtons = questionNavigation.querySelectorAll('button');
+            navButtons.forEach((btn, btnIndex) => {
+                if (btnIndex === index) {
+                    btn.classList.add('ring-2', 'ring-blue-500');
+                } else {
+                    btn.classList.remove('ring-2', 'ring-blue-500');
+                }
+            });
+            
+            // Update buttons
+            prevQuestionBtn.disabled = index === 0;
+            nextQuestionBtn.disabled = index === currentState.currentExam.questions.length - 1;
+            
+            // Update mark review button
+            markReviewBtn.textContent = question.markedForReview ? 'Unmark Review' : 'Mark for Review';
+            
+            // Render question
+            questionContainer.innerHTML = `
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Question ${question.id}</h3>
+                    <p class="text-gray-700 mb-6">${question.text}</p>
+                    
+                    <div class="space-y-3">
+                        ${question.options.map((option, optionIndex) => `
+                            <div class="flex items-center">
+                                <input type="radio" id="option-${optionIndex}" name="answer" value="${optionIndex}" 
+                                    ${question.selectedAnswer === optionIndex ? 'checked' : ''}
+                                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                <label for="option-${optionIndex}" class="ml-3 block text-gray-700">${option}</label>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            // Add event listeners for answer selection
+            document.querySelectorAll('input[name="answer"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    const selectedAnswer = parseInt(e.target.value);
+                    question.selectedAnswer = selectedAnswer;
+                    question.answered = true;
+                    
+                    // Update question counts and navigation
+                    updateQuestionCounts();
+                    updateNavigationButton(index);
+                });
+            });
+        }
+
+        function navigateQuestion(direction) {
+            const newIndex = currentState.currentQuestionIndex + direction;
+            
+            if (newIndex >= 0 && newIndex < currentState.currentExam.questions.length) {
+                currentState.currentQuestionIndex = newIndex;
+                loadQuestion(newIndex);
+            }
+        }
+
+        function toggleMarkForReview() {
+            const question = currentState.currentExam.questions[currentState.currentQuestionIndex];
+            question.markedForReview = !question.markedForReview;
+            
+            // Update UI
+            markReviewBtn.textContent = question.markedForReview ? 'Unmark Review' : 'Mark for Review';
+            
+            // Update navigation button
+            updateNavigationButton(currentState.currentQuestionIndex);
+            updateQuestionCounts();
+        }
+
+        function updateNavigationButton(index) {
+            const button = questionNavigation.children[index];
+            const question = currentState.currentExam.questions[index];
+            
+            button.className = `w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium 
+                              ${question.markedForReview ? 'bg-yellow-100 text-yellow-800' : 
+                              question.answered ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`;
+        }
+
+        function updateQuestionCounts() {
+            if (!currentState.currentExam) return;
+            
+            const answered = currentState.currentExam.questions.filter(q => q.answered).length;
+            const unanswered = currentState.currentExam.questions.length - answered;
+            const marked = currentState.currentExam.questions.filter(q => q.markedForReview).length;
+            
+            answeredCount.textContent = answered;
+            unansweredCount.textContent = unanswered;
+            markedCount.textContent = marked;
+            totalCount.textContent = currentState.currentExam.questions.length;
+        }
+
+        function startTimer() {
+            clearInterval(currentState.timerInterval);
+            
+            // Initial display
+            updateExamTimer();
+            updateDashboardAndMobileTimers();
+            
+            // Start interval
+            currentState.timerInterval = setInterval(() => {
+                currentState.timeRemaining--;
+                
+                if (currentState.timeRemaining <= 0) {
+                    clearInterval(currentState.timerInterval);
+                    submitExam(true); // Auto-submit when time expires
+                } else {
+                    updateExamTimer();
+                    updateDashboardAndMobileTimers();
+                    
+                    // Visual warning when time is running low
+                    if (currentState.timeRemaining <= 300) { // 5 minutes remaining
+                        examTimer.classList.add('bg-red-600', 'timer-warning');
+                        examTimer.classList.remove('bg-blue-100');
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateExamTimer() {
+            const hours = Math.floor(currentState.timeRemaining / 3600);
+            const minutes = Math.floor((currentState.timeRemaining % 3600) / 60);
+            const seconds = currentState.timeRemaining % 60;
+            
+            examTimer.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function updateDashboardAndMobileTimers() {
+            if (!currentState.currentExam) return;
+            
+            const examHours = Math.floor(currentState.currentExam.duration / 3600);
+            const examMinutes = Math.floor((currentState.currentExam.duration % 3600) / 60);
+            const examSeconds = currentState.currentExam.duration % 60;
+            
+            const elapsed = currentState.currentExam.duration - currentState.timeRemaining;
+            const elapsedHours = Math.floor(elapsed / 3600);
+            const elapsedMinutes = Math.floor((elapsed % 3600) / 60);
+            const elapsedSeconds = elapsed % 60;
+            
+            const timerText = `${String(elapsedHours).padStart(2, '0')}:${String(elapsedMinutes).padStart(2, '0')}:${String(elapsedSeconds).padStart(2, '0')}`;
+            
+            dashboardTimer.innerHTML = `<span>${timerText}</span>`;
+            mobileTimer.innerHTML = `<span>${timerText}</span>`;
+        }
+
+        function updateDashboardTimer() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {hour12: false});
+            
+            dashboardTimer.innerHTML = `<span>${timeString}</span>`;
+            mobileTimer.innerHTML = `<span>${timeString}</span>`;
+        }
+
+        function showSubmissionModal() {
+            if (!currentState.currentExam) return;
+            
+            // Update modal content
+            const answered = currentState.currentExam.questions.filter(q => q.answered).length;
+            const unanswered = currentState.currentExam.questions.length - answered;
+            const marked = currentState.currentExam.questions.filter(q => q.markedForReview).length;
+            
+            modalAnswered.textContent = answered;
+            modalUnanswered.textContent = unanswered;
+            modalMarked.textContent = marked;
+            
+            const hours = Math.floor(currentState.timeRemaining / 3600);
+            const minutes = Math.floor((currentState.timeRemaining % 3600) / 60);
+            const seconds = currentState.timeRemaining % 60;
+            modalTime.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            
+            // Show modal
+            submissionModal.classList.remove('hidden');
+        }
+
+        function hideSubmissionModal() {
+            submissionModal.classList.add('hidden');
+        }
+
+        function submitExam(isAutoSubmit = false) {
+            hideSubmissionModal();
+            
+            // In a real app, this would send answers to a server
+            console.log('Exam submitted:', currentState.currentExam);
+            
+            // Show completion modal with appropriate message
+            const message = isAutoSubmit ? 
+                'Your exam has been automatically submitted as the time has expired.' : 
+                'Your answers have been submitted successfully.';
+            
+            document.getElementById('modal-message').textContent = message;
+            
+            completionModal.classList.remove('hidden');
+        }
+
+        function returnToDashboard() {
+            completionModal.classList.add('hidden');
+            examInterfaceSection.classList.add('hidden');
+            examListSection.classList.remove('hidden');
+            currentState.currentExam = null;
+            clearInterval(currentState.timerInterval);
+        }
+
+        // Initialize dashboard timer
+        updateDashboardTimer();
+    </script>
+</body>
+</html>
